@@ -1,0 +1,77 @@
+# Example: Full deployment for Bean & Bloom Coffee Shop app
+# Before deploying, update image name to match your Docker Hub username
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bean-bloom
+  namespace: default
+  labels:
+    app: bean-bloom
+    version: "1.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bean-bloom
+  template:
+    metadata:
+      labels:
+        app: bean-bloom
+    spec:
+      containers:
+      - name: bean-bloom
+        image: your-dockerhub-username/bean-bloom:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: bean-bloom-service
+  namespace: default
+  labels:
+    app: bean-bloom
+spec:
+  type: LoadBalancer
+  selector:
+    app: bean-bloom
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: http
+
+---
+
+# Optional: Horizontal Pod Autoscaler (auto-scale based on CPU)
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: bean-bloom-hpa
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: bean-bloom
+#   minReplicas: 3
+#   maxReplicas: 10
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 80

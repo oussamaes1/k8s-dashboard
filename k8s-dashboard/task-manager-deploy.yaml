@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-manager-backend
+  template:
+    metadata:
+      labels:
+        app: task-manager-backend
+    spec:
+      containers:
+      - name: task-manager-backend
+        image: task-manager-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 4000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-manager-frontend
+  template:
+    metadata:
+      labels:
+        app: task-manager-frontend
+    spec:
+      containers:
+      - name: task-manager-frontend
+        image: task-manager-frontend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80

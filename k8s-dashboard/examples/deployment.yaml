@@ -1,0 +1,58 @@
+# Template Kubernetes Deployment
+# Copy this file and customize for your application
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp                    # Change to your app name
+  namespace: default             # Kubernetes namespace
+  labels:
+    app: myapp
+spec:
+  replicas: 3                    # Number of pod copies
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        # Change image to your Docker Hub image
+        image: your-dockerhub-username/myapp:1.0
+        imagePullPolicy: Always  # Always pull latest
+        ports:
+        - containerPort: 3000    # Change to your app's port
+          name: http
+        
+        # Resource limits - adjust based on your app
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        
+        # Optional: Environment variables
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: APP_NAME
+          value: "myapp"
+        
+        # Optional: Health check (uncomment if your app supports)
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 3000
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 10
+        
+        # Optional: Graceful shutdown
+        # lifecycle:
+        #   preStop:
+        #     exec:
+        #       command: ["/bin/sh", "-c", "sleep 5"]

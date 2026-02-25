@@ -1,0 +1,36 @@
+# Template Kubernetes Service
+# Copy this file and customize for your application
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service           # Change to your service name
+  namespace: default
+  labels:
+    app: myapp
+spec:
+  type: LoadBalancer            # External access
+                                # Options: LoadBalancer, ClusterIP, NodePort
+  selector:
+    app: myapp                  # Must match deployment label
+  ports:
+  - protocol: TCP
+    port: 80                    # External port
+    targetPort: 3000            # Container port (must match deployment)
+    name: http
+
+---
+
+# Optional: ClusterIP service for internal communication
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: myapp-internal
+# spec:
+#   type: ClusterIP
+#   selector:
+#     app: myapp
+#   ports:
+#   - protocol: TCP
+#     port: 80
+#     targetPort: 3000
