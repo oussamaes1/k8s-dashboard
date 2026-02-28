@@ -5,7 +5,7 @@ Multi-user, Multi-cluster support with SQLAlchemy
 from datetime import datetime
 from typing import Optional
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, Boolean, JSON
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
 import os
 

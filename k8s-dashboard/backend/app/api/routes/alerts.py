@@ -151,6 +151,29 @@ async def get_active_alerts() -> Dict[str, Any]:
     }
 
 
+@router.get("/stats")
+async def get_alert_stats() -> Dict[str, Any]:
+    """Get alert statistics"""
+    all_alerts = list(active_alerts.values())
+    
+    return {
+        "timestamp": datetime.utcnow().isoformat(),
+        "total_rules": len(alert_rules),
+        "enabled_rules": sum(1 for r in alert_rules.values() if r.get("enabled")),
+        "total_alerts": len(all_alerts),
+        "active_alerts": sum(1 for a in all_alerts if a.get("status") == "active"),
+        "acknowledged_alerts": sum(1 for a in all_alerts if a.get("status") == "acknowledged"),
+        "resolved_alerts": sum(1 for a in all_alerts if a.get("status") == "resolved"),
+        "alerts_last_24h": len(all_alerts),  # Demo
+        "by_severity": {
+            "critical": sum(1 for a in all_alerts if a.get("severity") == "critical"),
+            "error": sum(1 for a in all_alerts if a.get("severity") == "error"),
+            "warning": sum(1 for a in all_alerts if a.get("severity") == "warning"),
+            "info": sum(1 for a in all_alerts if a.get("severity") == "info")
+        }
+    }
+
+
 @router.get("/{alert_id}")
 async def get_alert(alert_id: str) -> Dict[str, Any]:
     """Get specific alert details"""
@@ -255,26 +278,3 @@ async def toggle_alert_rule(rule_id: str) -> Dict[str, Any]:
     rule["enabled"] = not rule.get("enabled", True)
     
     return rule
-
-
-@router.get("/stats")
-async def get_alert_stats() -> Dict[str, Any]:
-    """Get alert statistics"""
-    all_alerts = list(active_alerts.values())
-    
-    return {
-        "timestamp": datetime.utcnow().isoformat(),
-        "total_rules": len(alert_rules),
-        "enabled_rules": sum(1 for r in alert_rules.values() if r.get("enabled")),
-        "total_alerts": len(all_alerts),
-        "active_alerts": sum(1 for a in all_alerts if a.get("status") == "active"),
-        "acknowledged_alerts": sum(1 for a in all_alerts if a.get("status") == "acknowledged"),
-        "resolved_alerts": sum(1 for a in all_alerts if a.get("status") == "resolved"),
-        "alerts_last_24h": len(all_alerts),  # Demo
-        "by_severity": {
-            "critical": sum(1 for a in all_alerts if a.get("severity") == "critical"),
-            "error": sum(1 for a in all_alerts if a.get("severity") == "error"),
-            "warning": sum(1 for a in all_alerts if a.get("severity") == "warning"),
-            "info": sum(1 for a in all_alerts if a.get("severity") == "info")
-        }
-    }

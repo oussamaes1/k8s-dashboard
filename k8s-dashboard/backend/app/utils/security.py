@@ -10,6 +10,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
+import bcrypt as _bcrypt
 
 
 # Encryption key management
@@ -86,29 +87,36 @@ def decrypt_data(encrypted_data: str) -> str:
 
 def hash_password(password: str) -> str:
     """
-    Hash password using SHA256
-    
+    Hash password using bcrypt (secure, salted, adaptive).
+
     Args:
         password: Plain text password
-        
+
     Returns:
-        Hashed password
+        Bcrypt hashed password string
     """
-    return hashlib.sha256(password.encode()).hexdigest()
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Verify password against hash
-    
+    Verify password against hash.
+
+    Supports bcrypt hashes (new) and legacy SHA-256 hex hashes.
+    If a legacy hash matches, the caller should re-hash with bcrypt.
+
     Args:
         plain_password: Plain text password to verify
         hashed_password: Stored password hash
-        
+
     Returns:
         True if password matches, False otherwise
     """
-    return hash_password(plain_password) == hashed_password
+    # New bcrypt hashes start with '$2b$'
+    if hashed_password.startswith("$2b$"):
+        return _bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
+    # Legacy SHA-256 fallback
+    return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
 
 
 def encrypt_kubeconfig(kubeconfig_content: str) -> str:

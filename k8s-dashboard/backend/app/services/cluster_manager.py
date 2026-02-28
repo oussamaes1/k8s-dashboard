@@ -306,7 +306,7 @@ class ClusterManager:
             # Clean up temp file after initialization
             try:
                 os.unlink(temp_file.name)
-            except:
+            except OSError:
                 pass
             
             return k8s_service

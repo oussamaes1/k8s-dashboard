@@ -3,7 +3,6 @@ Authentication Routes with Role-Based Access Control
 """
 from datetime import datetime, timedelta
 from typing import Optional, List
-import hashlib
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
@@ -11,82 +10,16 @@ from sqlalchemy.orm import Session
 import jwt
 
 from app.database import get_db, User
-from app.utils.security import hash_password as security_hash_password, verify_password as security_verify_password
+from app.config import settings
+from app.utils.security import hash_password, verify_password
 
 router = APIRouter()
 security = HTTPBearer(auto_error=False)
 
-# Configuration
-SECRET_KEY = "your-secret-key-change-in-production-use-env-variable"
-ALGORITHM = "HS256"
+# Configuration – pulled from the centralised Settings object
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 hours
-
-# Simple password hashing function
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return hash_password(plain_password) == hashed_password
-
-# Demo users database (in production, use a proper database)
-USERS_DB = {
-    "admin": {
-        "username": "admin",
-        "email": "admin@k8s-dashboard.com",
-        "hashed_password": hash_password("admin"),
-        "role": "admin",
-        "is_active": True,
-        "created_at": "2026-01-20T10:00:00"
-    },
-    "user": {
-        "username": "user",
-        "email": "user@k8s-dashboard.com",
-        "hashed_password": hash_password("user"),
-        "role": "user",
-        "is_active": True,
-        "created_at": "2026-01-21T14:30:00"
-    },
-    "john": {
-        "username": "john",
-        "email": "john@k8s-dashboard.com",
-        "hashed_password": hash_password("john"),
-        "role": "user",
-        "is_active": True,
-        "created_at": "2026-01-22T09:15:00"
-    }
-}
-
-# User activity tracking (in production, use a proper database)
-USER_ACTIVITY_DB = {
-    "admin": {
-        "pods_viewed": 12,
-        "nodes_viewed": 5,
-        "alerts_count": 3,
-        "last_login": "2026-01-22T10:00:00",
-        "recent_activity": [
-            {
-                "action": "Viewed pod details: nginx-deployment-xyz",
-                "timestamp": "2 hours ago"
-            },
-            {
-                "action": "Checked cluster metrics",
-                "timestamp": "5 hours ago"
-            }
-        ]
-    },
-    "user": {
-        "pods_viewed": 8,
-        "nodes_viewed": 3,
-        "alerts_count": 1,
-        "last_login": "2026-01-21T14:30:00",
-        "recent_activity": [
-            {
-                "action": "Checked cluster metrics",
-                "timestamp": "1 day ago"
-            }
-        ]
-    }
-}
 
 
 # Pydantic Models
@@ -140,7 +73,7 @@ class UserStats(BaseModel):
 
 # Helper Functions
 def get_password_hash(password: str) -> str:
-    return security_hash_password(password)
+    return hash_password(password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -211,7 +144,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     # Query user from database
     user = db.query(User).filter(User.username == request.username).first()
     
-    if not user or not security_verify_password(request.password, user.hashed_password):
+    if not user or not verify_password(request.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
@@ -222,6 +155,11 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is inactive"
         )
+    
+    # Auto-upgrade legacy SHA-256 hashes to bcrypt on successful login
+    if not user.hashed_password.startswith("$2b$"):
+        user.hashed_password = hash_password(request.password)
+        db.commit()
     
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -422,27 +360,43 @@ async def get_stats(username: str = Depends(verify_admin), db: Session = Depends
 
 # User-specific Endpoints
 @router.get("/user-stats", response_model=UserStats)
-async def get_user_stats(username: str = Depends(verify_token)):
-    """Get current user's statistics"""
-    # Get user-specific stats from activity database
-    user_activity = USER_ACTIVITY_DB.get(username, {
-        "pods_viewed": 0,
-        "nodes_viewed": 0,
-        "alerts_count": 0,
-        "last_login": datetime.utcnow().isoformat()
-    })
-    
+async def get_user_stats(username: str = Depends(verify_token), db: Session = Depends(get_db)):
+    """Get current user's statistics from real database"""
+    from app.database import AuditLog, Cluster
+
+    user = db.query(User).filter(User.username == username).first()
+    cluster_count = db.query(Cluster).filter(Cluster.user_id == user.id).count() if user else 0
+    audit_count = db.query(AuditLog).filter(AuditLog.user_id == user.id).count() if user else 0
+
     return UserStats(
-        pods_viewed=user_activity["pods_viewed"],
-        nodes_viewed=user_activity["nodes_viewed"],
-        alerts_count=user_activity["alerts_count"],
-        last_login=user_activity["last_login"]
+        pods_viewed=audit_count,
+        nodes_viewed=cluster_count,
+        alerts_count=0,
+        last_login=user.updated_at.isoformat() if user and user.updated_at else datetime.utcnow().isoformat()
     )
 
 
 @router.get("/recent-activity")
-async def get_recent_activity(username: str = Depends(verify_token)):
-    """Get user's recent activity"""
-    # Get user-specific activity from database
-    user_activity = USER_ACTIVITY_DB.get(username, {})
-    return user_activity.get("recent_activity", [])
+async def get_recent_activity(username: str = Depends(verify_token), db: Session = Depends(get_db)):
+    """Get user's recent activity from audit logs"""
+    from app.database import AuditLog
+
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return []
+
+    logs = (
+        db.query(AuditLog)
+        .filter(AuditLog.user_id == user.id)
+        .order_by(AuditLog.timestamp.desc())
+        .limit(10)
+        .all()
+    )
+
+    return [
+        {
+            "action": f"{log.action} {log.resource_type or ''} {log.resource_name or ''}".strip(),
+            "timestamp": log.timestamp.isoformat() if log.timestamp else "",
+        }
+        for log in logs
+    ]

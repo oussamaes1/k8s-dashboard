@@ -82,13 +82,8 @@ async def create_cluster_kubeconfig(
     """
     # Get current user from database
     from app.database import User
-    print(f"DEBUG: Looking for username: '{username}' (type: {type(username)})")
     user = db.query(User).filter(User.username == username).first()
-    print(f"DEBUG: User query result: {user}")
     if not user:
-        # List all users for debugging
-        all_users = db.query(User).all()
-        print(f"DEBUG: All users in database: {[u.username for u in all_users]}")
         raise HTTPException(status_code=404, detail="User not found")
     
     try:

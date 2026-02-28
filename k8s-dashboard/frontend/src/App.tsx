@@ -5,6 +5,8 @@ import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import Login from './pages/Login'
+import AdminLogin from './pages/AdminLogin'
+import UserLogin from './pages/UserLogin'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import AdminDashboard from './pages/AdminDashboard'
@@ -18,6 +20,8 @@ import Logs from './pages/Logs'
 import Alerts from './pages/Alerts'
 import Metrics from './pages/Metrics'
 import RootCauseAnalysis from './pages/RootCauseAnalysis'
+import Settings from './pages/Settings'
+import Help from './pages/Help'
 import { useAuthStore } from './store'
 
 function App() {
@@ -32,6 +36,8 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={isAdmin ? "/admin" : "/user-dashboard"} replace />} />
+      <Route path="/admin-login" element={!isAuthenticated ? <AdminLogin /> : <Navigate to={isAdmin ? "/admin" : "/user-dashboard"} replace />} />
+      <Route path="/user-login" element={!isAuthenticated ? <UserLogin /> : <Navigate to={isAdmin ? "/admin" : "/user-dashboard"} replace />} />
       <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to={isAdmin ? "/admin" : "/user-dashboard"} replace />} />
       
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
@@ -54,6 +60,8 @@ function App() {
         <Route path="/metrics" element={<Metrics />} />
         <Route path="/root-cause-analysis" element={<RootCauseAnalysis />} />
         <Route path="/alerts" element={isAdmin ? <Alerts /> : <Navigate to="/user-dashboard" replace />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/help" element={<Help />} />
       </Route>
       
       <Route path="*" element={<Navigate to={isAuthenticated ? (isAdmin ? "/admin" : "/user-dashboard") : "/login"} replace />} />

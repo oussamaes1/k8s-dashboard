@@ -90,13 +90,13 @@ async def select_namespace(
     
     # In production, store this in user session (Redis/database)
     # For now, just validate and return success
-    logger.info(f"User {current_user['username']} selected namespace '{namespace}'")
+    logger.info(f"User {current_user.username} selected namespace '{namespace}'")
     
     return {
         "success": True,
         "message": f"Selected namespace '{namespace}'",
         "namespace": namespace,
-        "username": current_user["username"]
+        "username": current_user.username
     }
 
 

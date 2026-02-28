@@ -37,7 +37,7 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/auth/users')
+      const response = await axios.get('/api/v1/auth/users')
       setUsers(response.data)
     } catch (error) {
       console.error('Failed to fetch users:', error)
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/auth/stats')
+      const response = await axios.get('/api/v1/auth/stats')
       setStats(response.data)
     } catch (error) {
       console.error('Failed to fetch stats:', error)
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await axios.post('http://localhost:8000/api/v1/auth/register', formData)
+      await axios.post('/api/v1/auth/register', formData)
       setShowAddUser(false)
       setFormData({ username: '', password: '', email: '', role: 'user' })
       fetchUsers()
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
     if (!editingUser) return
     
     try {
-      await axios.put(`http://localhost:8000/api/v1/auth/users/${editingUser.username}`, {
+      await axios.put(`/api/v1/auth/users/${editingUser.username}`, {
         email: formData.email,
         role: formData.role,
         is_active: editingUser.is_active
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
     if (!confirm(`Are you sure you want to delete user "${username}"?`)) return
     
     try {
-      await axios.delete(`http://localhost:8000/api/v1/auth/users/${username}`)
+      await axios.delete(`/api/v1/auth/users/${username}`)
       fetchUsers()
       fetchStats()
     } catch (error: any) {
@@ -121,14 +121,14 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
         <button
           onClick={() => {
             setShowAddUser(true)
             setEditingUser(null)
             setFormData({ username: '', password: '', email: '', role: 'user' })
           }}
-          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
           <UserPlus className="w-5 h-5 mr-2" />
           Add User
@@ -138,40 +138,40 @@ export default function AdminDashboard() {
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Users</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.total_users}</p>
+                <p className="text-sm text-gray-400">Total Users</p>
+                <p className="text-3xl font-bold text-white">{stats.total_users}</p>
               </div>
-              <Users className="w-12 h-12 text-blue-500" />
+              <Users className="w-12 h-12 text-blue-400" />
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Active Users</p>
-                <p className="text-3xl font-bold text-green-600">{stats.active_users}</p>
+                <p className="text-sm text-gray-400">Active Users</p>
+                <p className="text-3xl font-bold text-green-400">{stats.active_users}</p>
               </div>
-              <Activity className="w-12 h-12 text-green-500" />
+              <Activity className="w-12 h-12 text-green-400" />
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Admins</p>
-                <p className="text-3xl font-bold text-purple-600">{stats.admin_users}</p>
+                <p className="text-sm text-gray-400">Admins</p>
+                <p className="text-3xl font-bold text-purple-400">{stats.admin_users}</p>
               </div>
-              <Shield className="w-12 h-12 text-purple-500" />
+              <Shield className="w-12 h-12 text-purple-400" />
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Regular Users</p>
-                <p className="text-3xl font-bold text-indigo-600">{stats.regular_users}</p>
+                <p className="text-sm text-gray-400">Regular Users</p>
+                <p className="text-3xl font-bold text-indigo-400">{stats.regular_users}</p>
               </div>
-              <Database className="w-12 h-12 text-indigo-500" />
+              <Database className="w-12 h-12 text-indigo-400" />
             </div>
           </div>
         </div>
@@ -179,59 +179,63 @@ export default function AdminDashboard() {
 
       {/* Add/Edit User Form */}
       {(showAddUser || editingUser) && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">
+        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">
             {editingUser ? 'Edit User' : 'Add New User'}
           </h2>
           <form onSubmit={editingUser ? handleUpdateUser : handleAddUser} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Username
                 </label>
                 <input
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                   disabled={!!editingUser}
+                  placeholder="Enter username"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Email
                 </label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
+                  placeholder="Enter email"
                 />
               </div>
               {!editingUser && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
                     Password
                   </label>
                   <input
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     required
+                    placeholder="Enter password"
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Role
                 </label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'user' })}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  title="Select user role"
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
@@ -241,7 +245,7 @@ export default function AdminDashboard() {
             <div className="flex space-x-3">
               <button
                 type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 {editingUser ? 'Update User' : 'Create User'}
               </button>
@@ -252,7 +256,7 @@ export default function AdminDashboard() {
                   setEditingUser(null)
                   setFormData({ username: '', password: '', email: '', role: 'user' })
                 }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition"
               >
                 Cancel
               </button>
@@ -262,45 +266,45 @@ export default function AdminDashboard() {
       )}
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-xl font-semibold">User Management</h2>
+      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-700">
+          <h2 className="text-xl font-semibold text-white">User Management</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-700">
+            <thead className="bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Username
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-700">
               {users.map((user) => (
-                <tr key={user.username} className="hover:bg-gray-50">
+                <tr key={user.username} className="hover:bg-gray-700/50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                    <div className="text-sm font-medium text-white">{user.username}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{user.email}</div>
+                    <div className="text-sm text-gray-400">{user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       user.role === 'admin' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : 'bg-blue-100 text-blue-800'
+                        ? 'bg-purple-500/20 text-purple-400' 
+                        : 'bg-blue-500/20 text-blue-400'
                     }`}>
                       {user.role}
                     </span>
@@ -308,8 +312,8 @@ export default function AdminDashboard() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       user.is_active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-500/20 text-green-400' 
+                        : 'bg-red-500/20 text-red-400'
                     }`}>
                       {user.is_active ? 'Active' : 'Inactive'}
                     </span>
@@ -318,13 +322,17 @@ export default function AdminDashboard() {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => startEdit(user)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-blue-400 hover:text-blue-300"
+                        title="Edit user"
+                        aria-label={`Edit ${user.username}`}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user.username)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-400 hover:text-red-300"
+                        title="Delete user"
+                        aria-label={`Delete ${user.username}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

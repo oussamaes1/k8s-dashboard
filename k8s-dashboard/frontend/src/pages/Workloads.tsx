@@ -45,7 +45,7 @@ export default function Workloads() {
 
     try {
       await axios.post(
-        `http://localhost:8000/api/v1/cluster/deployments/${scaleDeployment.namespace}/${scaleDeployment.name}/scale?replicas=${scaleDeployment.replicas}`
+        `/api/v1/cluster/deployments/${scaleDeployment.namespace}/${scaleDeployment.name}/scale?replicas=${scaleDeployment.replicas}`
       )
       setActionMessage({ type: 'success', text: `Successfully scaled ${scaleDeployment.name} to ${scaleDeployment.replicas} replicas` })
       setScaleDeployment(null)
@@ -63,7 +63,7 @@ export default function Workloads() {
     if (!window.confirm(`Restart pod '${podName}'? It will be recreated by the controller.`)) return
 
     try {
-      await axios.post(`http://localhost:8000/api/v1/cluster/pods/${namespace}/${podName}/restart`)
+      await axios.post(`/api/v1/cluster/pods/${namespace}/${podName}/restart`)
       setActionMessage({ type: 'success', text: `Successfully restarted ${podName}` })
       setTimeout(() => refetchPods(), 1000)
     } catch (error: any) {

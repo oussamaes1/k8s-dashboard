@@ -90,8 +90,6 @@ export const logsApi = {
 
 // Alerts API
 export const alertsApi = {
-    getAlerts: (status?: string, severity?: string) => 
-      api.get('/alerts/', { params: { status, severity } }),
   getAll: (status?: string, severity?: string) => 
     api.get('/alerts/', { params: { status, severity } }),
   getActive: () => api.get('/alerts/active'),
@@ -126,7 +124,7 @@ export const namespacesApi = {
 // Cluster Management API
 export const clusterManagementApi = {
   list: () => api.get('/clusters/'),
-  get: (id: number) => api.get(`/clusters/${id}/`),
+  get: (id: number) => api.get(`/clusters/${id}`),
   createWithKubeconfig: (data: {
     name: string
     kubeconfig_content: string
@@ -141,13 +139,13 @@ export const clusterManagementApi = {
     description?: string
     allowed_namespaces?: string[]
     is_namespace_restricted?: boolean
-  }) => api.post('/clusters/token/', data),
+  }) => api.post('/clusters/token', data),
   uploadKubeconfig: (name: string, file: File, description?: string) => {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('name', name)
     if (description) formData.append('description', description)
-    return api.post('/clusters/upload-kubeconfig/', formData, {
+    return api.post('/clusters/upload-kubeconfig', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
   },
@@ -156,9 +154,9 @@ export const clusterManagementApi = {
     description?: string
     allowed_namespaces?: string[]
     is_namespace_restricted?: boolean
-  }) => api.put(`/clusters/${id}/`, data),
-  delete: (id: number) => api.delete(`/clusters/${id}/`),
-  testConnection: (id: number) => api.post(`/clusters/${id}/test/`),
+  }) => api.put(`/clusters/${id}`, data),
+  delete: (id: number) => api.delete(`/clusters/${id}`),
+  testConnection: (id: number) => api.post(`/clusters/${id}/test`),
 }
 
 export default api

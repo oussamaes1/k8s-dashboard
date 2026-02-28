@@ -16,7 +16,7 @@ import {
   Search,
   Database,
 } from 'lucide-react'
-import { useAlertStore, useAuthStore } from '../store'
+import { useAlertStore, useAuthStore, useClusterStore } from '../store'
 import NamespaceSelector from './NamespaceSelector'
 import ClusterStatus from './ClusterStatus'
 import ClusterSwitcher from './ClusterSwitcher'
@@ -51,6 +51,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const { activeAlerts, criticalAlerts } = useAlertStore()
   const { user, isAdmin, logout } = useAuthStore()
+  const { isConnected } = useClusterStore()
 
   const navItems = isAdmin ? adminNavItems : userNavItems
 
@@ -125,11 +126,27 @@ export default function Layout() {
             </div>
             <span className="text-xs text-gray-400">{user?.role || 'User'}</span>
           </div>
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-k8s-border hover:text-white transition-all">
+          <button 
+            onClick={() => navigate('/settings')}
+            className={clsx(
+              "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+              location.pathname === '/settings'
+                ? 'bg-k8s-blue text-white'
+                : 'text-gray-400 hover:bg-k8s-border hover:text-white'
+            )}
+          >
             <Settings size={20} />
             <span>Settings</span>
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-k8s-border hover:text-white transition-all">
+          <button 
+            onClick={() => navigate('/help')}
+            className={clsx(
+              "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+              location.pathname === '/help'
+                ? 'bg-k8s-blue text-white'
+                : 'text-gray-400 hover:bg-k8s-border hover:text-white'
+            )}
+          >
             <HelpCircle size={20} />
             <span>Help</span>
           </button>
@@ -145,8 +162,10 @@ export default function Layout() {
         {/* Status Indicator */}
         <div className="p-4 border-t border-k8s-border">
           <div className="flex items-center gap-2 text-sm">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-gray-400">Demo Mode Active</span>
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-yellow-500'} animate-pulse`}></div>
+            <span className={isConnected ? 'text-green-400' : 'text-yellow-400'}>
+              {isConnected ? 'Cluster Connected' : 'Demo Mode Active'}
+            </span>
           </div>
         </div>
       </aside>
@@ -158,7 +177,10 @@ export default function Layout() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-white">
-                {navItems.find((item) => item.path === location.pathname)?.label || 'Dashboard'}
+                {navItems.find((item) => item.path === location.pathname)?.label 
+                  || (location.pathname === '/settings' ? 'Settings' : '')
+                  || (location.pathname === '/help' ? 'Help Center' : '')
+                  || 'Dashboard'}
               </h2>
               <p className="text-sm text-gray-400">Kubernetes Cluster Management</p>
             </div>
@@ -167,7 +189,10 @@ export default function Layout() {
               <span className="text-sm text-gray-400">
                 Last updated: {new Date().toLocaleTimeString()}
               </span>
-              <button className="px-4 py-2 bg-k8s-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-k8s-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
                 Refresh
               </button>
             </div>

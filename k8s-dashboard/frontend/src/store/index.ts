@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isAdmin: false,
       login: async (username: string, password: string) => {
-        const response = await axios.post('http://localhost:8000/api/v1/auth/login', {
+        const response = await axios.post('/api/v1/auth/login', {
           username,
           password,
         })
@@ -115,7 +115,7 @@ export const useClusterStore = create<ClusterState>()(
       },
       fetchClusters: async () => {
         try {
-          const response = await axios.get('/api/v1/clusters')
+          const response = await axios.get('/api/v1/clusters/')
           const clusters = response.data
           set({ clusters })
           // Auto-select first cluster if none selected

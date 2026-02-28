@@ -10,6 +10,26 @@ from datetime import datetime
 router = APIRouter()
 
 
+def _parse_memory(value: str) -> int:
+    """Parse Kubernetes memory string (e.g., '24191164Ki', '16Gi', '512Mi') to MiB."""
+    if isinstance(value, (int, float)):
+        return int(value)
+    value = str(value).strip()
+    try:
+        if value.endswith("Ki"):
+            return int(value[:-2]) // 1024  # KiB to MiB
+        elif value.endswith("Mi"):
+            return int(value[:-2])
+        elif value.endswith("Gi"):
+            return int(value[:-2]) * 1024
+        elif value.endswith("Ti"):
+            return int(value[:-2]) * 1024 * 1024
+        else:
+            return int(value)
+    except (ValueError, TypeError):
+        return 0
+
+
 class MetricsInput(BaseModel):
     """Input model for metrics"""
     cpu_percent: float = 0
@@ -43,7 +63,7 @@ async def get_current_metrics(request: Request) -> Dict[str, Any]:
         "resources": {
             "total_cpu_capacity": sum(int(n.get("cpu", 0)) for n in nodes),
             "total_memory_capacity": sum(
-                int(n.get("memory", "0Gi").replace("Gi", "").replace("Mi", "")) 
+                _parse_memory(n.get("memory", "0Gi"))
                 for n in nodes
             ),
             "total_pods_capacity": sum(int(n.get("pods", 0)) for n in nodes)
