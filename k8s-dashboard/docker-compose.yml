@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build: ./backend
@@ -7,27 +5,25 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Kubernetes connection settings
-      - K8S_IN_CLUSTER=false              # Set to 'true' if running inside K8s cluster
-      - K8S_CONFIG_PATH=/root/.kube/config # Path to kubeconfig in container
-      
-      # Application settings
-      - DEBUG=true
+      # Kubernetes
+      - K8S_IN_CLUSTER=false
+      - K8S_CONFIG_PATH=/root/.kube/config
+      # App
+      - DEBUG=false
       - LOG_LEVEL=INFO
+      # Auth / Security – override defaults for Docker deployment
+      - SECRET_KEY=${SECRET_KEY:-change-me-use-a-strong-random-key}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=480
+      - DATABASE_URL=sqlite:///./data/k8s_dashboard.db
+      # CORS – allow the frontend container
+      - CORS_ORIGINS=http://localhost:3000,http://localhost,http://127.0.0.1:3000,http://127.0.0.1
     volumes:
-      # Mount kubeconfig for cluster access
-      # Linux/Mac: ~/.kube/config mounts properly
-      # Windows with WSL: WSL automatically handles path conversion
-      # Windows with Docker Desktop: Use Windows path or WSL mount
-      - ~/.kube:/root/.kube:ro
+      - ${USERPROFILE}/.kube:/root/.kube:ro
+      - backend-data:/app/data
     networks:
       - k8s-dashboard
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
@@ -38,18 +34,11 @@ services:
       - backend
     networks:
       - k8s-dashboard
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    restart: unless-stopped
+
+volumes:
+  backend-data:
 
 networks:
   k8s-dashboard:
     driver: bridge
-
-# To use with a real Kubernetes cluster:
-# 1. Ensure kubectl is configured with your cluster: kubectl cluster-info
-# 2. docker-compose will mount ~/.kube/config to the backend container
-# 3. Backend will auto-detect and connect to your cluster
-# 4. Real cluster data will appear in the dashboard
