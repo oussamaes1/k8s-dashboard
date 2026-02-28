@@ -15,7 +15,7 @@ export default function RootCauseAnalysis() {
 
   const { data: alerts } = useQuery({
     queryKey: ['alerts'],
-    queryFn: () => alertsApi.getAlerts().then(res => res.data),
+    queryFn: () => alertsApi.getAll().then(res => res.data),
     refetchInterval: 15000,
   })
 

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { clusterApi, metricsApi, alertsApi } from '../services/api'
 import { StatCard, Card, StatusBadge } from '../components/ui/Card'
 import { Server, Box, Activity, Bell, AlertTriangle, CheckCircle } from 'lucide-react'
@@ -205,7 +206,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Alerts */}
         <Card title="Active Alerts" action={
-          <a href="/alerts" className="text-k8s-blue hover:text-blue-400 text-sm">View All →</a>
+          <Link to="/alerts" className="text-k8s-blue hover:text-blue-400 text-sm">View All →</Link>
         }>
           <div className="space-y-3">
             {alerts?.alerts?.slice(0, 5).map((alert: any) => (
@@ -234,7 +235,7 @@ export default function Dashboard() {
 
         {/* Recent Events */}
         <Card title="Recent Events" action={
-          <a href="/logs" className="text-k8s-blue hover:text-blue-400 text-sm">View All →</a>
+          <Link to="/logs" className="text-k8s-blue hover:text-blue-400 text-sm">View All →</Link>
         }>
           <div className="space-y-3">
             {events?.slice(0, 5).map((event: any, index: number) => (

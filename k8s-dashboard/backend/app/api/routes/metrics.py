@@ -2,10 +2,11 @@
 Metrics API Routes
 Endpoints for cluster metrics and anomaly detection
 """
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
 from datetime import datetime
+from app.api.routes.auth import get_current_user
 
 router = APIRouter()
 
@@ -42,7 +43,7 @@ class MetricsInput(BaseModel):
 
 
 @router.get("/current")
-async def get_current_metrics(request: Request) -> Dict[str, Any]:
+async def get_current_metrics(request: Request, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Get current cluster metrics"""
     k8s_service = request.app.state.k8s_service
     
@@ -73,7 +74,7 @@ async def get_current_metrics(request: Request) -> Dict[str, Any]:
 
 
 @router.get("/nodes/{node_name}")
-async def get_node_metrics(node_name: str, request: Request) -> Dict[str, Any]:
+async def get_node_metrics(node_name: str, request: Request, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Get metrics for a specific node"""
     k8s_service = request.app.state.k8s_service
     nodes = k8s_service.get_nodes()
@@ -102,7 +103,7 @@ async def get_node_metrics(node_name: str, request: Request) -> Dict[str, Any]:
 
 
 @router.post("/detect")
-async def detect_anomaly(metrics: MetricsInput, request: Request) -> Dict[str, Any]:
+async def detect_anomaly(metrics: MetricsInput, request: Request, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Detect anomalies in provided metrics"""
     anomaly_detector = request.app.state.anomaly_detector
     
@@ -120,7 +121,8 @@ async def detect_anomaly(metrics: MetricsInput, request: Request) -> Dict[str, A
 @router.get("/anomalies")
 async def get_anomaly_history(
     request: Request,
-    limit: int = 20
+    limit: int = 20,
+    _user: str = Depends(get_current_user)
 ) -> List[Dict[str, Any]]:
     """Get history of detected anomalies"""
     anomaly_detector = request.app.state.anomaly_detector
@@ -128,7 +130,7 @@ async def get_anomaly_history(
 
 
 @router.get("/summary")
-async def get_metrics_summary(request: Request) -> Dict[str, Any]:
+async def get_metrics_summary(request: Request, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Get summary statistics of collected metrics"""
     anomaly_detector = request.app.state.anomaly_detector
     return anomaly_detector.get_metrics_summary()
@@ -138,7 +140,8 @@ async def get_metrics_summary(request: Request) -> Dict[str, Any]:
 async def get_metrics_history(
     request: Request,
     metric: Optional[str] = None,
-    limit: int = 100
+    limit: int = 100,
+    _user: str = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get historical metrics data for charting"""
     # Demo data for visualization

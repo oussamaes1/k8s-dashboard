@@ -11,16 +11,35 @@ interface UserStats {
   last_login: string
 }
 
+interface SystemStatus {
+  api: boolean
+  cluster: boolean
+  monitoring: boolean
+}
+
 export default function UserDashboard() {
   const { user } = useAuthStore()
   const [stats, setStats] = useState<UserStats | null>(null)
   const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [systemStatus, setSystemStatus] = useState<SystemStatus>({ api: false, cluster: false, monitoring: false })
 
   useEffect(() => {
     fetchUserStats()
     fetchRecentActivity()
+    fetchSystemStatus()
   }, [])
+
+  const fetchSystemStatus = async () => {
+    try {
+      const healthRes = await axios.get('/api/v1/cluster/health')
+      const healthy = healthRes.data?.healthy === true
+      setSystemStatus({ api: true, cluster: healthy, monitoring: healthy })
+    } catch {
+      // API reachable (we got a response) but cluster may be down
+      setSystemStatus(prev => ({ ...prev, api: true }))
+    }
+  }
 
   const fetchUserStats = async () => {
     try {
@@ -165,27 +184,21 @@ export default function UserDashboard() {
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
         <h2 className="text-xl font-semibold text-white mb-4">System Status</h2>
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-              <span className="text-sm font-medium text-white">API Server</span>
+          {[
+            { label: 'API Server', ok: systemStatus.api },
+            { label: 'Cluster Health', ok: systemStatus.cluster },
+            { label: 'Monitoring', ok: systemStatus.monitoring },
+          ].map((item) => (
+            <div key={item.label} className={`flex items-center justify-between p-3 ${item.ok ? 'bg-green-500/10' : 'bg-red-500/10'} rounded-lg`}>
+              <div className="flex items-center">
+                <div className={`w-3 h-3 ${item.ok ? 'bg-green-500' : 'bg-red-500'} rounded-full mr-3`}></div>
+                <span className="text-sm font-medium text-white">{item.label}</span>
+              </div>
+              <span className={`text-xs font-semibold ${item.ok ? 'text-green-400' : 'text-red-400'}`}>
+                {item.ok ? 'Online' : 'Offline'}
+              </span>
             </div>
-            <span className="text-xs text-green-400 font-semibold">Online</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-              <span className="text-sm font-medium text-white">Cluster Health</span>
-            </div>
-            <span className="text-xs text-green-400 font-semibold">Healthy</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-blue-500/10 rounded-lg">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-              <span className="text-sm font-medium text-white">Monitoring</span>
-            </div>
-            <span className="text-xs text-blue-400 font-semibold">Active</span>
-          </div>
+          ))}
         </div>
       </div>
     </div>

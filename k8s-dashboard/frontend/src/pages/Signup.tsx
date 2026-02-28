@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Shield, User, Mail, Lock, ArrowLeft } from 'lucide-react'
 import axios from 'axios'
+import { toast } from '../components/Toast'
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -38,7 +39,7 @@ export default function Signup() {
         email: formData.email,
         password: formData.password
       })
-      alert('Account created successfully! Please login.')
+      toast('Account created successfully! Please login.', 'success')
       navigate('/login')
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Registration failed. Please try again.')

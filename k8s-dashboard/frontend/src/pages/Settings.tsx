@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { User, Mail, Shield, Lock, Monitor, Clock, Save, CheckCircle } from 'lucide-react'
 import { useAuthStore, useClusterStore } from '../store'
+import { toast } from '../components/Toast'
+import axios from 'axios'
 
 export default function Settings() {
   const { user, isAdmin } = useAuthStore()
@@ -13,7 +15,6 @@ export default function Settings() {
     confirmPassword: '',
   })
   const [passwordError, setPasswordError] = useState('')
-  const [passwordSuccess, setPasswordSuccess] = useState('')
 
   const showSaved = () => {
     setSaved(true)
@@ -28,7 +29,6 @@ export default function Settings() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
     setPasswordError('')
-    setPasswordSuccess('')
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setPasswordError('New passwords do not match')
@@ -39,9 +39,21 @@ export default function Settings() {
       return
     }
 
-    // In a full implementation this would call a password-change API
-    setPasswordSuccess('Password changed successfully')
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    try {
+      await axios.post('/api/v1/auth/change-password', {
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+      }, {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.token}`,
+        },
+      })
+      toast('Password changed successfully', 'success')
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || 'Failed to change password'
+      setPasswordError(msg)
+    }
   }
 
   const tabs = [
@@ -172,35 +184,10 @@ export default function Settings() {
             </div>
 
             <div className="border-t border-gray-700 pt-4">
-              <h3 className="text-sm font-medium text-gray-400 mb-3">Notification Preferences</h3>
-              <div className="space-y-3">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm text-gray-300">Show critical alerts as browser notifications</span>
-                  <input type="checkbox" defaultChecked className="w-4 h-4 rounded bg-gray-900 border-gray-600 text-blue-500 focus:ring-blue-500" />
-                </label>
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm text-gray-300">Show pod failure alerts</span>
-                  <input type="checkbox" defaultChecked className="w-4 h-4 rounded bg-gray-900 border-gray-600 text-blue-500 focus:ring-blue-500" />
-                </label>
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm text-gray-300">Show high resource usage warnings</span>
-                  <input type="checkbox" defaultChecked className="w-4 h-4 rounded bg-gray-900 border-gray-600 text-blue-500 focus:ring-blue-500" />
-                </label>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-700 pt-4">
-              <h3 className="text-sm font-medium text-gray-400 mb-3">Display</h3>
-              <div className="space-y-3">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm text-gray-300">Show demo mode indicator</span>
-                  <input type="checkbox" defaultChecked className="w-4 h-4 rounded bg-gray-900 border-gray-600 text-blue-500 focus:ring-blue-500" />
-                </label>
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="text-sm text-gray-300">Compact navigation sidebar</span>
-                  <input type="checkbox" className="w-4 h-4 rounded bg-gray-900 border-gray-600 text-blue-500 focus:ring-blue-500" />
-                </label>
-              </div>
+              <h3 className="text-sm font-medium text-gray-400 mb-3">Notifications</h3>
+              <p className="text-sm text-gray-500">
+                Alert notifications are displayed as in-app toasts when new critical events are detected.
+              </p>
             </div>
           </div>
         </div>
@@ -252,11 +239,6 @@ export default function Settings() {
             {passwordError && (
               <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 px-3 py-2 rounded">
                 {passwordError}
-              </div>
-            )}
-            {passwordSuccess && (
-              <div className="text-green-400 text-sm bg-green-500/10 border border-green-500/30 px-3 py-2 rounded">
-                {passwordSuccess}
               </div>
             )}
 

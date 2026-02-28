@@ -2,10 +2,11 @@
 Logs API Routes
 Endpoints for log aggregation and search
 """
-from fastapi import APIRouter, HTTPException, Request, Query
+from fastapi import APIRouter, HTTPException, Request, Query, Depends
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 import random
+from app.api.routes.auth import get_current_user
 
 router = APIRouter()
 
@@ -16,7 +17,8 @@ async def get_pod_logs(
     pod_name: str,
     request: Request,
     container: Optional[str] = None,
-    tail_lines: int = Query(default=100, ge=1, le=5000)
+    tail_lines: int = Query(default=100, ge=1, le=5000),
+    _user: str = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get logs from a specific pod"""
     k8s_service = request.app.state.k8s_service
@@ -44,7 +46,8 @@ async def search_logs(
     query: str = Query(..., min_length=1),
     namespace: Optional[str] = None,
     severity: Optional[str] = None,
-    limit: int = Query(default=100, ge=1, le=1000)
+    limit: int = Query(default=100, ge=1, le=1000),
+    _user: str = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Search logs across pods"""
     # Demo implementation - in production would use ELK/Loki
@@ -64,7 +67,8 @@ async def get_aggregated_logs(
     request: Request,
     namespace: Optional[str] = None,
     severity: Optional[str] = None,
-    since_minutes: int = Query(default=60, ge=1, le=1440)
+    since_minutes: int = Query(default=60, ge=1, le=1440),
+    _user: str = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get aggregated logs from all pods"""
     k8s_service = request.app.state.k8s_service
@@ -103,7 +107,8 @@ async def get_aggregated_logs(
 @router.get("/stats")
 async def get_log_stats(
     request: Request,
-    namespace: Optional[str] = None
+    namespace: Optional[str] = None,
+    _user: str = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get log statistics"""
     return {

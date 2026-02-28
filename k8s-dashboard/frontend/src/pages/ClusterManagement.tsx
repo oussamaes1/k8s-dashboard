@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, Server, CheckCircle, XCircle, Upload, Link as LinkIcon } from 'lucide-react'
 import { clusterManagementApi } from '../services/api'
 import { useClusterStore } from '../store'
+import { toast } from '../components/Toast'
 
 interface Cluster {
   id: number
@@ -68,21 +69,21 @@ export default function ClusterManagement() {
       resetForm()
       loadClusters()
       fetchClusters()
-      alert('Cluster added successfully!')
+      toast('Cluster added successfully!', 'success')
     } catch (error: any) {
-      alert('Failed to add cluster: ' + (error.response?.data?.detail || error.message))
+      toast('Failed to add cluster: ' + (error.response?.data?.detail || error.message), 'error')
     }
   }
 
   const handleDeleteCluster = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this cluster?')) return
+    if (!window.confirm('Are you sure you want to delete this cluster?')) return
     try {
       await clusterManagementApi.delete(id)
       loadClusters()
       fetchClusters()
-      alert('Cluster deleted successfully!')
+      toast('Cluster deleted successfully!', 'success')
     } catch (error: any) {
-      alert('Failed to delete cluster: ' + (error.response?.data?.detail || error.message))
+      toast('Failed to delete cluster: ' + (error.response?.data?.detail || error.message), 'error')
     }
   }
 
@@ -90,12 +91,12 @@ export default function ClusterManagement() {
     try {
       const response = await clusterManagementApi.testConnection(id)
       if (response.data.success) {
-        alert('Connection successful!\n\n' + JSON.stringify(response.data.cluster_info, null, 2))
+        toast('Connection successful! Cluster is reachable.', 'success')
       } else {
-        alert('Connection failed: ' + response.data.error)
+        toast('Connection failed: ' + response.data.error, 'error')
       }
     } catch (error: any) {
-      alert('Connection test failed: ' + (error.response?.data?.detail || error.message))
+      toast('Connection test failed: ' + (error.response?.data?.detail || error.message), 'error')
     }
   }
 

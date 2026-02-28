@@ -13,11 +13,12 @@ class Settings(BaseSettings):
 	# App
 	APP_NAME: str = "K8s Dashboard API"
 	APP_VERSION: str = "1.0.0"
-	DEBUG: bool = True
+	DEBUG: bool = False
 
 	# Security / JWT
 	SECRET_KEY: str = "change-me-in-production-use-a-strong-random-string"
 	ALGORITHM: str = "HS256"
+	ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
 
 	# API
 	API_V1_PREFIX: str = "/api/v1"

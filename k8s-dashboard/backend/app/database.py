@@ -118,7 +118,6 @@ def get_db() -> Session:
 def init_db():
     """Initialize database tables"""
     Base.metadata.create_all(bind=engine)
-    print("Database initialized successfully")
 
 
 def create_default_admin(db: Session):
@@ -137,7 +136,6 @@ def create_default_admin(db: Session):
         db.add(admin)
         db.commit()
         db.refresh(admin)
-        print(f"Default admin user created: {admin.username}")
     return admin
 
 

@@ -34,11 +34,8 @@ const faqs: FAQItem[] = [
 ]
 
 const shortcuts = [
-  { keys: ['Ctrl', 'K'], description: 'Quick search / command palette' },
-  { keys: ['Ctrl', 'R'], description: 'Refresh current view' },
-  { keys: ['Ctrl', 'Shift', 'N'], description: 'Switch namespace' },
-  { keys: ['Ctrl', 'Shift', 'C'], description: 'Switch cluster' },
   { keys: ['Esc'], description: 'Close modals / cancel action' },
+  { keys: ['F5'], description: 'Refresh current page' },
 ]
 
 const features = [
@@ -118,6 +115,7 @@ export default function Help() {
       {activeSection === 'shortcuts' && (
         <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-white">Keyboard Shortcuts</h2>
+          <p className="text-sm text-gray-500 mb-2">Standard browser shortcuts are supported.</p>
           <div className="space-y-3">
             {shortcuts.map((shortcut) => (
               <div key={shortcut.description} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">

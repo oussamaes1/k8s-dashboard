@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Users, Shield, Activity, Database, UserPlus, Trash2, Edit } from 'lucide-react'
 import axios from 'axios'
+import { toast } from '../components/Toast'
 
 interface User {
   username: string
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
       fetchUsers()
       fetchStats()
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to add user')
+      toast(error.response?.data?.detail || 'Failed to add user', 'error')
     }
   }
 
@@ -83,19 +84,19 @@ export default function AdminDashboard() {
       fetchUsers()
       fetchStats()
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to update user')
+      toast(error.response?.data?.detail || 'Failed to update user', 'error')
     }
   }
 
   const handleDeleteUser = async (username: string) => {
-    if (!confirm(`Are you sure you want to delete user "${username}"?`)) return
+    if (!window.confirm(`Are you sure you want to delete user "${username}"?`)) return
     
     try {
       await axios.delete(`/api/v1/auth/users/${username}`)
       fetchUsers()
       fetchStats()
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to delete user')
+      toast(error.response?.data?.detail || 'Failed to delete user', 'error')
     }
   }
 

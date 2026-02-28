@@ -2,12 +2,13 @@
 Alerts API Routes
 Endpoints for alert management and notifications
 """
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
 from enum import Enum
 import uuid
+from app.api.routes.auth import get_current_user
 
 router = APIRouter()
 
@@ -120,7 +121,8 @@ active_alerts: Dict[str, Dict] = {
 @router.get("/")
 async def get_alerts(
     status: Optional[AlertStatus] = None,
-    severity: Optional[AlertSeverity] = None
+    severity: Optional[AlertSeverity] = None,
+    _user: str = Depends(get_current_user)
 ) -> List[Dict[str, Any]]:
     """Get all alerts, optionally filtered"""
     alerts = list(active_alerts.values())
@@ -135,7 +137,7 @@ async def get_alerts(
 
 
 @router.get("/active")
-async def get_active_alerts() -> Dict[str, Any]:
+async def get_active_alerts(_user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Get active (non-resolved) alerts with summary"""
     active = [a for a in active_alerts.values() if a.get("status") != "resolved"]
     
@@ -152,7 +154,7 @@ async def get_active_alerts() -> Dict[str, Any]:
 
 
 @router.get("/stats")
-async def get_alert_stats() -> Dict[str, Any]:
+async def get_alert_stats(_user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Get alert statistics"""
     all_alerts = list(active_alerts.values())
     
@@ -175,7 +177,7 @@ async def get_alert_stats() -> Dict[str, Any]:
 
 
 @router.get("/{alert_id}")
-async def get_alert(alert_id: str) -> Dict[str, Any]:
+async def get_alert(alert_id: str, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Get specific alert details"""
     if alert_id not in active_alerts:
         raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
@@ -183,7 +185,7 @@ async def get_alert(alert_id: str) -> Dict[str, Any]:
 
 
 @router.post("/{alert_id}/acknowledge")
-async def acknowledge_alert(alert_id: str, ack: AlertAcknowledge) -> Dict[str, Any]:
+async def acknowledge_alert(alert_id: str, ack: AlertAcknowledge, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Acknowledge an alert"""
     if alert_id not in active_alerts:
         raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
@@ -199,7 +201,7 @@ async def acknowledge_alert(alert_id: str, ack: AlertAcknowledge) -> Dict[str, A
 
 
 @router.post("/{alert_id}/resolve")
-async def resolve_alert(alert_id: str) -> Dict[str, Any]:
+async def resolve_alert(alert_id: str, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Resolve an alert"""
     if alert_id not in active_alerts:
         raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
@@ -213,13 +215,13 @@ async def resolve_alert(alert_id: str) -> Dict[str, Any]:
 
 # Alert Rules endpoints
 @router.get("/rules/")
-async def get_alert_rules() -> List[Dict[str, Any]]:
+async def get_alert_rules(_user: str = Depends(get_current_user)) -> List[Dict[str, Any]]:
     """Get all alert rules"""
     return list(alert_rules.values())
 
 
 @router.post("/rules/")
-async def create_alert_rule(rule: AlertRule) -> Dict[str, Any]:
+async def create_alert_rule(rule: AlertRule, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Create a new alert rule"""
     rule_id = f"rule-{uuid.uuid4().hex[:8]}"
     
@@ -234,7 +236,7 @@ async def create_alert_rule(rule: AlertRule) -> Dict[str, Any]:
 
 
 @router.get("/rules/{rule_id}")
-async def get_alert_rule(rule_id: str) -> Dict[str, Any]:
+async def get_alert_rule(rule_id: str, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Get specific alert rule"""
     if rule_id not in alert_rules:
         raise HTTPException(status_code=404, detail=f"Rule {rule_id} not found")
@@ -242,7 +244,7 @@ async def get_alert_rule(rule_id: str) -> Dict[str, Any]:
 
 
 @router.put("/rules/{rule_id}")
-async def update_alert_rule(rule_id: str, rule: AlertRule) -> Dict[str, Any]:
+async def update_alert_rule(rule_id: str, rule: AlertRule, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Update an alert rule"""
     if rule_id not in alert_rules:
         raise HTTPException(status_code=404, detail=f"Rule {rule_id} not found")
@@ -259,7 +261,7 @@ async def update_alert_rule(rule_id: str, rule: AlertRule) -> Dict[str, Any]:
 
 
 @router.delete("/rules/{rule_id}")
-async def delete_alert_rule(rule_id: str) -> Dict[str, str]:
+async def delete_alert_rule(rule_id: str, _user: str = Depends(get_current_user)) -> Dict[str, str]:
     """Delete an alert rule"""
     if rule_id not in alert_rules:
         raise HTTPException(status_code=404, detail=f"Rule {rule_id} not found")
@@ -269,7 +271,7 @@ async def delete_alert_rule(rule_id: str) -> Dict[str, str]:
 
 
 @router.post("/rules/{rule_id}/toggle")
-async def toggle_alert_rule(rule_id: str) -> Dict[str, Any]:
+async def toggle_alert_rule(rule_id: str, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
     """Enable or disable an alert rule"""
     if rule_id not in alert_rules:
         raise HTTPException(status_code=404, detail=f"Rule {rule_id} not found")

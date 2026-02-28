@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { logsApi, clusterApi } from '../services/api'
 import { Card } from '../components/ui/Card'
 import { Search, Filter, Download, RefreshCw } from 'lucide-react'
+import { toast } from '../components/Toast'
 
 export default function Logs() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -35,6 +36,23 @@ export default function Logs() {
       case 'DEBUG': return 'text-purple-400 bg-purple-500/20'
       default: return 'text-blue-400 bg-blue-500/20'
     }
+  }
+
+  const handleExport = () => {
+    const entries = logs?.logs || []
+    if (entries.length === 0) {
+      toast('No log entries to export', 'warning')
+      return
+    }
+    const text = entries.map((l: any) => `[${l.timestamp || ''}] [${l.severity || 'INFO'}] ${l.pod || ''}: ${l.message || ''}`).join('\n')
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `k8s-logs-${new Date().toISOString().slice(0,10)}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast('Logs exported successfully', 'success')
   }
 
   return (
@@ -122,7 +140,10 @@ export default function Logs() {
             <RefreshCw size={16} />
             Refresh
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-k8s-border text-white rounded-lg hover:bg-gray-600 transition-colors">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 bg-k8s-border text-white rounded-lg hover:bg-gray-600 transition-colors"
+          >
             <Download size={16} />
             Export
           </button>

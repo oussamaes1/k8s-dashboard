@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { alertsApi } from '../services/api'
 import { Card, StatusBadge } from '../components/ui/Card'
 import { Bell, Check, X, Plus, Settings } from 'lucide-react'
+import { toast } from '../components/Toast'
 
 export default function Alerts() {
   const [showRules, setShowRules] = useState(false)
@@ -171,7 +172,10 @@ export default function Alerts() {
         <Card 
           title="Alert Rules" 
           action={
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-k8s-blue text-white rounded-lg hover:bg-blue-600 text-sm">
+            <button
+              onClick={() => toast('Navigate to the Alerts Rules tab to create rules via the API', 'info')}
+              className="flex items-center gap-2 px-3 py-1.5 bg-k8s-blue text-white rounded-lg hover:bg-blue-600 text-sm"
+            >
               <Plus size={14} />
               Add Rule
             </button>
@@ -220,7 +224,7 @@ export default function Alerts() {
                       </span>
                     </td>
                     <td className="py-4 px-4">
-                      <button className="text-gray-400 hover:text-white">
+                      <button title="Configure rule" className="text-gray-400 hover:text-white">
                         <Settings size={16} />
                       </button>
                     </td>

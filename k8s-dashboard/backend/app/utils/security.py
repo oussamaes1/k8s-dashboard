@@ -11,6 +11,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 import bcrypt as _bcrypt
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Encryption key management
@@ -20,7 +23,7 @@ ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 if not ENCRYPTION_KEY:
     # Generate a key if not provided (for development only)
     # In production, this MUST be set via environment variable and stored securely
-    print("WARNING: ENCRYPTION_KEY not set. Generating temporary key (NOT FOR PRODUCTION)")
+    logger.warning("ENCRYPTION_KEY not set. Generating temporary key (NOT FOR PRODUCTION)")
     ENCRYPTION_KEY = Fernet.generate_key().decode()
 
 
