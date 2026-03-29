@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 import random
 from app.api.routes.auth import get_current_user
+from app.middleware import resolve_user_k8s_service
 
 router = APIRouter()
 
@@ -18,10 +19,10 @@ async def get_pod_logs(
     request: Request,
     container: Optional[str] = None,
     tail_lines: int = Query(default=100, ge=1, le=5000),
-    _user: str = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get logs from a specific pod"""
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     
     logs = k8s_service.get_pod_logs(
         name=pod_name,
@@ -68,10 +69,10 @@ async def get_aggregated_logs(
     namespace: Optional[str] = None,
     severity: Optional[str] = None,
     since_minutes: int = Query(default=60, ge=1, le=1440),
-    _user: str = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get aggregated logs from all pods"""
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     pods = k8s_service.get_pods(namespace)
     
     # Collect logs from each pod (demo mode)
@@ -108,9 +109,11 @@ async def get_aggregated_logs(
 async def get_log_stats(
     request: Request,
     namespace: Optional[str] = None,
-    _user: str = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get log statistics"""
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
+
     return {
         "timestamp": datetime.utcnow().isoformat(),
         "stats": {
@@ -134,7 +137,7 @@ async def get_log_stats(
                 {"name": "prometheus-0", "count": 1800}
             ]
         },
-        "demo_mode": True
+        "demo_mode": not k8s_service.is_connected()
     }
 
 

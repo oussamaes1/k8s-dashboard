@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store'
-import { User, ArrowLeft, Lock, UserPlus, Monitor } from 'lucide-react'
+import { User, Lock, UserPlus, Monitor } from 'lucide-react'
 
 export default function UserLogin() {
   const [username, setUsername] = useState('')
@@ -37,15 +37,6 @@ export default function UserLogin() {
       </div>
 
       <div className="relative w-full max-w-md">
-        {/* Back button */}
-        <Link
-          to="/login"
-          className="inline-flex items-center gap-2 text-blue-300 hover:text-white text-sm mb-6 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to portal selection
-        </Link>
-
         <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-blue-500/20 shadow-2xl shadow-blue-500/10 p-8">
           {/* Header */}
           <div className="text-center mb-8">

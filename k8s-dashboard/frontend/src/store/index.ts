@@ -117,11 +117,21 @@ export const useClusterStore = create<ClusterState>()(
         try {
           const response = await axios.get('/api/v1/clusters/')
           const clusters = response.data
-          set({ clusters })
-          // Auto-select first cluster if none selected
-          if (!get().currentCluster && clusters.length > 0) {
-            set({ currentCluster: clusters[0] })
+          const currentCluster = get().currentCluster
+
+          // Auto-heal stale persisted selection:
+          // if current cluster is missing (deleted / belongs to another user),
+          // reset to first available cluster so requests stop using invalid cluster_id.
+          if (clusters.length === 0) {
+            set({ clusters, currentCluster: null })
+            return
           }
+
+          const hasCurrent = !!currentCluster && clusters.some((c: Cluster) => c.id === currentCluster.id)
+          set({
+            clusters,
+            currentCluster: hasCurrent ? currentCluster : clusters[0],
+          })
         } catch (error) {
           console.error('Failed to fetch clusters:', error)
         }

@@ -117,6 +117,48 @@ def get_user_k8s_service(request: Request, cluster_id: int, user_id: int):
             db.close()
 
 
+def resolve_user_k8s_service(request: Request, user_id: int):
+    """
+    Resolve KubernetesService for the current user.
+
+    Resolution order:
+    1. Explicit cluster_id from request state (usually from query param middleware parsing)
+    2. First active cluster owned by the user
+    3. Global app-level Kubernetes service (demo/fallback for users without clusters)
+
+    Args:
+        request: FastAPI request
+        user_id: Authenticated user ID
+
+    Returns:
+        KubernetesService instance
+
+    Raises:
+        HTTPException if a requested cluster is not found/unauthorized
+    """
+    db = request.state.db if hasattr(request.state, 'db') else SessionLocal()
+
+    try:
+        # Prefer explicitly selected cluster from query/path
+        cluster_id = getattr(request.state, 'cluster_id', None)
+        if cluster_id:
+            return get_user_k8s_service(request, cluster_id, user_id)
+
+        # Fall back to first active user cluster if available
+        user_clusters = cluster_manager.get_user_clusters(db, user_id)
+        if user_clusters:
+            default_cluster_id = user_clusters[0].id
+            request.state.cluster_id = default_cluster_id
+            return get_user_k8s_service(request, default_cluster_id, user_id)
+
+        # No user clusters configured yet -> use global fallback/demo service
+        return request.app.state.k8s_service
+
+    finally:
+        if not hasattr(request.state, 'db'):
+            db.close()
+
+
 def require_cluster_access(cluster_id: int, user_id: int) -> Callable:
     """
     Decorator to require cluster access

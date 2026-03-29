@@ -5,7 +5,8 @@ Endpoints for managing Kubernetes namespaces (projects)
 from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
-from app.api.routes.auth import verify_admin, get_current_user
+from app.api.routes.auth import get_current_user
+from app.middleware import resolve_user_k8s_service
 import logging
 
 router = APIRouter()
@@ -37,12 +38,15 @@ NAMESPACE_METADATA_DB: Dict[str, Dict[str, Any]] = {
 
 
 @router.get("", response_model=List[NamespaceResponse])
-async def get_namespaces(request: Request):
+async def get_namespaces(
+    request: Request,
+    current_user = Depends(get_current_user)
+):
     """
     Get all available namespaces (for display in project selector)
     Filters out system namespaces that users shouldn't interact with
     """
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     namespaces = k8s_service.get_namespaces()
     
     # Filter out internal system namespaces
@@ -72,13 +76,13 @@ async def get_namespaces(request: Request):
 async def select_namespace(
     namespace: str,
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     User selects a namespace/project to work with
     This endpoint validates the namespace exists and allows filtering
     """
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     namespaces = k8s_service.get_namespaces()
     
     # Verify namespace exists
@@ -104,13 +108,13 @@ async def select_namespace(
 async def get_namespace_summary(
     namespace: str,
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Get comprehensive summary of namespace resources
     Useful for displaying project overview
     """
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     
     # Verify namespace exists
     namespaces = k8s_service.get_namespaces()
@@ -164,13 +168,13 @@ async def get_namespace_summary(
 async def get_namespace_health(
     namespace: str,
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Get health status of a specific namespace
     Returns overall health based on pod status and events
     """
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     
     pods = k8s_service.get_pods(namespace)
     events = k8s_service.get_events(namespace, limit=100)

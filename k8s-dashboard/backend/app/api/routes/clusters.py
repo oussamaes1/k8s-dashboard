@@ -54,7 +54,7 @@ class ClusterResponse(BaseModel):
     allowed_namespaces: List[str] = []
     is_namespace_restricted: bool = False
     is_active: bool = True
-    last_connected: Optional[str] = None
+    last_connected: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     

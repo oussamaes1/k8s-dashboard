@@ -24,6 +24,31 @@ api.interceptors.request.use(
         console.error('Failed to parse auth token:', error)
       }
     }
+
+    // Attach selected cluster_id to monitored endpoints
+    const monitoredPrefixes = ['/cluster', '/metrics', '/logs', '/namespaces', '/alerts']
+    const urlPath = config.url || ''
+    const shouldAttachCluster = monitoredPrefixes.some((prefix) => urlPath.startsWith(prefix))
+
+    if (shouldAttachCluster) {
+      const clusterStorage = localStorage.getItem('cluster-storage')
+      if (clusterStorage) {
+        try {
+          const { state } = JSON.parse(clusterStorage)
+          const clusterId = state?.currentCluster?.id
+          if (clusterId) {
+            const existingParams = (config.params || {}) as Record<string, unknown>
+            config.params = {
+              ...existingParams,
+              cluster_id: existingParams.cluster_id ?? clusterId,
+            }
+          }
+        } catch (error) {
+          console.error('Failed to parse cluster selection:', error)
+        }
+      }
+    }
+
     return config
   },
   (error) => {

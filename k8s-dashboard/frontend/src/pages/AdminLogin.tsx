@@ -49,7 +49,7 @@ export default function AdminLogin() {
           className="inline-flex items-center gap-2 text-purple-300 hover:text-white text-sm mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to portal selection
+          Back to user sign in
         </Link>
 
         <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-purple-500/20 shadow-2xl shadow-purple-500/10 p-8">

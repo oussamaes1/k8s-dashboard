@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 from app.api.routes.auth import get_current_user
+from app.middleware import resolve_user_k8s_service
 
 router = APIRouter()
 
@@ -43,9 +44,9 @@ class MetricsInput(BaseModel):
 
 
 @router.get("/current")
-async def get_current_metrics(request: Request, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
+async def get_current_metrics(request: Request, current_user = Depends(get_current_user)) -> Dict[str, Any]:
     """Get current cluster metrics"""
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     
     pods = k8s_service.get_pods()
     nodes = k8s_service.get_nodes()
@@ -74,9 +75,9 @@ async def get_current_metrics(request: Request, _user: str = Depends(get_current
 
 
 @router.get("/nodes/{node_name}")
-async def get_node_metrics(node_name: str, request: Request, _user: str = Depends(get_current_user)) -> Dict[str, Any]:
+async def get_node_metrics(node_name: str, request: Request, current_user = Depends(get_current_user)) -> Dict[str, Any]:
     """Get metrics for a specific node"""
-    k8s_service = request.app.state.k8s_service
+    k8s_service = resolve_user_k8s_service(request, current_user.id)
     nodes = k8s_service.get_nodes()
     
     for node in nodes:

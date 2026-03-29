@@ -3,6 +3,7 @@ Kubernetes Service
 Handles all communication with the Kubernetes cluster
 """
 import logging
+import os
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
@@ -68,6 +69,26 @@ class KubernetesService:
                 else:
                     config.load_kube_config()
                 logger.info("Loaded kubeconfig from file")
+
+                # Docker networking fix:
+                # kubeconfig generated on host often points to 127.0.0.1/localhost.
+                # Inside container, that resolves to container loopback and fails.
+                # Rewrite host to host.docker.internal and relax SSL hostname check
+                # for local dev connectivity.
+                cfg = client.Configuration.get_default_copy()
+                if os.path.exists('/.dockerenv') and cfg.host and (
+                    '127.0.0.1' in cfg.host or 'localhost' in cfg.host
+                ):
+                    original_host = cfg.host
+                    cfg.host = cfg.host.replace('127.0.0.1', 'host.docker.internal').replace('localhost', 'host.docker.internal')
+                    cfg.verify_ssl = False
+                    client.Configuration.set_default(cfg)
+                    logger.warning(
+                        "Detected localhost kube API in Docker (%s -> %s). "
+                        "Using host.docker.internal with verify_ssl=False for development.",
+                        original_host,
+                        cfg.host,
+                    )
             
             self._client = client
             self._core_v1 = client.CoreV1Api()
