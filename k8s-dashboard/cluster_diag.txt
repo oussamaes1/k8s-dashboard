@@ -1,0 +1,99 @@
+﻿LOGIN_OK
+CLUSTERS:
+[
+    {
+        "id":  1,
+        "name":  "tiny-test-bg",
+        "description":  "tiny",
+        "allowed_namespaces":  [
+
+                               ],
+        "is_namespace_restricted":  false,
+        "is_active":  true,
+        "last_connected":  null,
+        "created_at":  "2026-03-09T02:03:10.382905",
+        "updated_at":  "2026-03-09T02:03:10.382909"
+    },
+    {
+        "id":  2,
+        "name":  "full-kube-python-test",
+        "description":  "full content test",
+        "allowed_namespaces":  [
+
+                               ],
+        "is_namespace_restricted":  false,
+        "is_active":  true,
+        "last_connected":  null,
+        "created_at":  "2026-03-09T02:04:05.658060",
+        "updated_at":  "2026-03-09T02:04:05.658064"
+    },
+    {
+        "id":  3,
+        "name":  "full-kube-python-test2",
+        "description":  "full",
+        "allowed_namespaces":  [
+
+                               ],
+        "is_namespace_restricted":  false,
+        "is_active":  true,
+        "last_connected":  null,
+        "created_at":  "2026-03-09T02:04:18.210139",
+        "updated_at":  "2026-03-09T02:04:18.210141"
+    },
+    {
+        "id":  4,
+        "name":  "full-kube-script-test",
+        "description":  "script test",
+        "allowed_namespaces":  [
+
+                               ],
+        "is_namespace_restricted":  false,
+        "is_active":  true,
+        "last_connected":  null,
+        "created_at":  "2026-03-09T02:04:37.370538",
+        "updated_at":  "2026-03-09T02:04:37.370541"
+    },
+    {
+        "id":  5,
+        "name":  "docker-live-check",
+        "description":  "docker check",
+        "allowed_namespaces":  [
+
+                               ],
+        "is_namespace_restricted":  false,
+        "is_active":  true,
+        "last_connected":  null,
+        "created_at":  "2026-03-09T02:14:36.766263",
+        "updated_at":  "2026-03-09T02:14:36.766267"
+    }
+]
+TEST cluster_id=1 name=tiny-test-bg
+{
+    "success":  false,
+    "cluster_info":  null,
+    "error":  "Failed to initialize cluster connection"
+}
+TEST cluster_id=2 name=full-kube-python-test
+{
+    "success":  false,
+    "cluster_info":  null,
+    "error":  "Failed to initialize cluster connection"
+}
+TEST cluster_id=3 name=full-kube-python-test2
+{
+    "success":  false,
+    "cluster_info":  null,
+    "error":  "Failed to initialize cluster connection"
+}
+TEST cluster_id=4 name=full-kube-script-test
+{
+    "success":  false,
+    "cluster_info":  null,
+    "error":  "Failed to initialize cluster connection"
+}
+TEST cluster_id=5 name=docker-live-check
+{
+    "success":  false,
+    "cluster_info":  null,
+    "error":  "Cannot connect to Kubernetes cluster"
+}

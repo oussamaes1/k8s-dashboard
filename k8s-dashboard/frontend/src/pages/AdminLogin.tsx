@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../store'
-import { Shield, ArrowLeft, Lock, User } from 'lucide-react'
+import { Shield, ArrowLeft, Lock, User, Loader2 } from 'lucide-react'
 
 export default function AdminLogin() {
   const [username, setUsername] = useState('')
@@ -34,47 +34,57 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background elements */}
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated gradient background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-violet-950/50 to-slate-950" />
+        {/* Floating orbs */}
+        <div className="absolute top-10 right-10 w-[400px] h-[400px] bg-violet-600/15 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[120px]" />
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Back button */}
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 text-purple-300 hover:text-white text-sm mb-6 transition"
+          className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 text-sm mb-8 transition-colors group"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to user sign in
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to portals
         </Link>
 
-        <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-purple-500/20 shadow-2xl shadow-purple-500/10 p-8">
+        {/* Card */}
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-violet-500/20 shadow-2xl shadow-violet-500/10 p-8 relative overflow-hidden">
+          {/* Top gradient line */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl mb-4 shadow-lg shadow-purple-500/30">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl mb-5 shadow-lg shadow-violet-500/30">
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
-            <p className="text-purple-300 mt-2 text-sm">Restricted access — Administrators only</p>
+            <p className="text-violet-300/70 mt-2 text-sm">Restricted access &mdash; Administrators only</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="admin-username" className="block text-sm font-medium text-purple-200 mb-2">
+              <label htmlFor="admin-username" className="block text-sm font-medium text-slate-300 mb-2">
                 Admin Username
               </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+              <div className="relative group">
+                <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center">
+                  <User className="w-5 h-5 text-violet-400/60 group-focus-within:text-violet-400 transition-colors" />
+                </div>
                 <input
                   id="admin-username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-800/80 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-900/60 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 outline-none transition-all duration-300"
                   placeholder="Enter admin username"
                   required
                   disabled={isLoading}
@@ -83,17 +93,19 @@ export default function AdminLogin() {
             </div>
 
             <div>
-              <label htmlFor="admin-password" className="block text-sm font-medium text-purple-200 mb-2">
+              <label htmlFor="admin-password" className="block text-sm font-medium text-slate-300 mb-2">
                 Password
               </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+              <div className="relative group">
+                <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-violet-400/60 group-focus-within:text-violet-400 transition-colors" />
+                </div>
                 <input
                   id="admin-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-800/80 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-900/60 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 outline-none transition-all duration-300"
                   placeholder="Enter password"
                   required
                   disabled={isLoading}
@@ -102,7 +114,8 @@ export default function AdminLogin() {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                <Lock className="w-4 h-4 flex-shrink-0" />
                 {error}
               </div>
             )}
@@ -110,32 +123,34 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
+              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-violet-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:ring-offset-2 focus:ring-offset-slate-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 active:translate-y-0"
             >
               {isLoading ? (
                 <span className="inline-flex items-center gap-2">
-                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Authenticating...
                 </span>
-              ) : 'Sign In as Administrator'}
+              ) : (
+                'Sign In as Administrator'
+              )}
             </button>
           </form>
 
           {/* Demo credentials */}
-          <div className="mt-6 pt-6 border-t border-purple-500/20">
-            <p className="text-xs font-semibold text-purple-300 mb-2">Demo Admin Credentials:</p>
-            <div className="flex items-center justify-between bg-purple-500/10 border border-purple-500/20 px-4 py-2 rounded-lg">
-              <span className="text-sm text-purple-200">admin</span>
-              <span className="text-sm text-purple-400 font-mono">/</span>
-              <span className="text-sm text-purple-200">admin</span>
+          <div className="mt-6 pt-6 border-t border-slate-700/50">
+            <p className="text-xs font-semibold text-violet-300/70 mb-3">Demo Admin Credentials:</p>
+            <div className="flex items-center justify-between bg-violet-500/10 border border-violet-500/20 px-4 py-2.5 rounded-xl">
+              <span className="text-sm text-violet-200 font-medium">admin</span>
+              <span className="text-sm text-violet-400/50 font-mono">/</span>
+              <span className="text-sm text-violet-200 font-medium">admin</span>
             </div>
           </div>
         </div>
 
         {/* Security badge */}
-        <div className="text-center mt-4">
-          <div className="inline-flex items-center gap-2 text-xs text-purple-400/60">
-            <Lock className="w-3 h-3" />
+        <div className="text-center mt-6">
+          <div className="inline-flex items-center gap-2 text-xs text-violet-400/40">
+            <Lock className="w-3.5 h-3.5" />
             Protected by JWT Authentication &middot; AES-256 Encryption
           </div>
         </div>
