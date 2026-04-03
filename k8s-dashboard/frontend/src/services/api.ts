@@ -25,10 +25,12 @@ api.interceptors.request.use(
       }
     }
 
-    // Attach selected cluster_id to monitored endpoints
-    const monitoredPrefixes = ['/cluster', '/metrics', '/logs', '/namespaces', '/alerts']
+    // Attach selected cluster_id to API endpoints except auth and cluster-management endpoints
+    // (cluster-management endpoints operate on the list of configured clusters themselves)
+    const excludedPrefixes = ['/auth', '/clusters']
     const urlPath = config.url || ''
-    const shouldAttachCluster = monitoredPrefixes.some((prefix) => urlPath.startsWith(prefix))
+    const shouldAttachCluster =
+      urlPath.startsWith('/') && !excludedPrefixes.some((prefix) => urlPath.startsWith(prefix))
 
     if (shouldAttachCluster) {
       const clusterStorage = localStorage.getItem('cluster-storage')
@@ -100,6 +102,14 @@ export const metricsApi = {
   getSummary: () => api.get('/metrics/summary'),
   getHistory: (metric?: string, limit?: number) => 
     api.get('/metrics/history', { params: { metric, limit } }),
+}
+
+// Observability API (Phase 1)
+export const observabilityApi = {
+  getSnapshot: () => api.get('/metrics/current'),
+  getHistory: (limit?: number) => api.get('/metrics/history', { params: { limit } }),
+  getAnomalies: (limit?: number) => api.get('/metrics/anomalies', { params: { limit } }),
+  getSummary: () => api.get('/metrics/summary'),
 }
 
 // Logs API

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { HelpCircle, BookOpen, Keyboard, Server, Shield, ChevronDown, ChevronUp, Terminal, Activity, AlertTriangle, Box, Cpu, Globe } from 'lucide-react'
+import { HelpCircle, BookOpen, Keyboard, Server, Shield, ChevronDown, Terminal, Activity, AlertTriangle, Box, Cpu, Globe, Sparkles, Zap, Search, Mail, Github, ExternalLink } from 'lucide-react'
 
 interface FAQItem {
   question: string
@@ -39,14 +39,14 @@ const shortcuts = [
 ]
 
 const features = [
-  { icon: Server, title: 'Cluster Overview', desc: 'View cluster health, node count, and resource usage at a glance' },
-  { icon: Box, title: 'Workloads', desc: 'Monitor Deployments, StatefulSets, DaemonSets, and Jobs' },
-  { icon: Cpu, title: 'Nodes', desc: 'Inspect node status, capacity, allocatable resources, and conditions' },
-  { icon: Terminal, title: 'Pod Logs', desc: 'Stream real-time logs from running containers' },
-  { icon: Activity, title: 'Metrics', desc: 'CPU, memory, and network metrics with historical charts' },
-  { icon: AlertTriangle, title: 'Alerts', desc: 'Automated alerting for anomalies and threshold breaches' },
-  { icon: Globe, title: 'Multi-Cluster', desc: 'Manage and switch between multiple Kubernetes clusters' },
-  { icon: Shield, title: 'RBAC', desc: 'Role-based access control for admin and user roles' },
+  { icon: Server, title: 'Cluster Overview', desc: 'View cluster health, node count, and resource usage at a glance', gradient: 'from-cyan-500 to-blue-500', bg: 'bg-cyan-500/20' },
+  { icon: Box, title: 'Workloads', desc: 'Monitor Deployments, StatefulSets, DaemonSets, and Jobs', gradient: 'from-purple-500 to-pink-500', bg: 'bg-purple-500/20' },
+  { icon: Cpu, title: 'Nodes', desc: 'Inspect node status, capacity, allocatable resources, and conditions', gradient: 'from-green-500 to-emerald-500', bg: 'bg-green-500/20' },
+  { icon: Terminal, title: 'Pod Logs', desc: 'Stream real-time logs from running containers', gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/20' },
+  { icon: Activity, title: 'Metrics', desc: 'CPU, memory, and network metrics with historical charts', gradient: 'from-red-500 to-pink-500', bg: 'bg-red-500/20' },
+  { icon: AlertTriangle, title: 'Alerts', desc: 'Automated alerting for anomalies and threshold breaches', gradient: 'from-orange-500 to-red-500', bg: 'bg-orange-500/20' },
+  { icon: Globe, title: 'Multi-Cluster', desc: 'Manage and switch between multiple Kubernetes clusters', gradient: 'from-blue-500 to-indigo-500', bg: 'bg-blue-500/20' },
+  { icon: Shield, title: 'RBAC', desc: 'Role-based access control for admin and user roles', gradient: 'from-slate-500 to-gray-500', bg: 'bg-slate-500/20' },
 ]
 
 export default function Help() {
@@ -60,50 +60,78 @@ export default function Help() {
     { id: 'about' as const, label: 'About', icon: Server },
   ]
 
+  const activeSectionIndex = sections.findIndex(s => s.id === activeSection)
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Help Center</h1>
-        <p className="text-gray-400 mt-1">Learn how to use the K8s Dashboard</p>
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/20">
+          <HelpCircle className="w-6 h-6 text-cyan-400" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Help Center</h1>
+          <p className="text-slate-400 mt-1">Learn how to use the K8s Dashboard</p>
+        </div>
       </div>
 
       {/* Section Tabs */}
-      <div className="flex gap-1 bg-gray-800 p-1 rounded-lg w-fit">
-        {sections.map((sec) => {
-          const Icon = sec.icon
-          return (
-            <button
-              key={sec.id}
-              onClick={() => setActiveSection(sec.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                activeSection === sec.id
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {sec.label}
-            </button>
-          )
-        })}
+      <div className="relative">
+        <div className="flex gap-1 p-1 rounded-xl bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm w-fit">
+          <div 
+            className="absolute top-1 h-[calc(100%-8px)] bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-lg transition-all duration-300 ease-out"
+            style={{
+              left: `${activeSectionIndex * (100 / sections.length)}%`,
+              width: `${100 / sections.length}%`,
+            }}
+          />
+          {sections.map((sec) => {
+            const Icon = sec.icon
+            return (
+              <button
+                key={sec.id}
+                onClick={() => setActiveSection(sec.id)}
+                className={`relative z-10 flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  activeSection === sec.id
+                    ? 'text-cyan-400'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {sec.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Features */}
       {activeSection === 'features' && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-white">Dashboard Features</h2>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/20">
+              <Sparkles className="w-5 h-5 text-cyan-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-white">Dashboard Features</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {features.map((feature) => {
               const Icon = feature.icon
               return (
-                <div key={feature.title} className="bg-gray-800 rounded-lg border border-gray-700 p-4 flex items-start gap-4">
-                  <div className="p-2 bg-blue-600/20 rounded-lg">
-                    <Icon className="w-5 h-5 text-blue-400" />
+                <div 
+                  key={feature.title} 
+                  className="group relative overflow-hidden rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-5 hover:border-slate-600/50 transition-all duration-200 hover:shadow-lg hover:shadow-slate-900/50"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${feature.gradient} bg-opacity-20 border border-white/10 shadow-lg`}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white group-hover:text-cyan-400 transition-colors">{feature.title}</h3>
+                      <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">{feature.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-white">{feature.title}</h3>
-                    <p className="text-sm text-gray-400 mt-1">{feature.desc}</p>
-                  </div>
+                  <div className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full bg-white/5 blur-xl group-hover:bg-white/10 transition-colors"></div>
                 </div>
               )
             })}
@@ -113,91 +141,184 @@ export default function Help() {
 
       {/* Keyboard Shortcuts */}
       {activeSection === 'shortcuts' && (
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white">Keyboard Shortcuts</h2>
-          <p className="text-sm text-gray-500 mb-2">Standard browser shortcuts are supported.</p>
-          <div className="space-y-3">
-            {shortcuts.map((shortcut) => (
-              <div key={shortcut.description} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">
-                <span className="text-gray-300 text-sm">{shortcut.description}</span>
-                <div className="flex gap-1">
-                  {shortcut.keys.map((key) => (
-                    <kbd
-                      key={key}
-                      className="px-2 py-1 bg-gray-900 border border-gray-600 rounded text-xs font-mono text-gray-300"
-                    >
-                      {key}
-                    </kbd>
-                  ))}
+        <div className="relative overflow-hidden rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 shadow-xl">
+          <div className="p-6 border-b border-slate-700/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/20">
+                <Keyboard className="w-5 h-5 text-purple-400" />
+              </div>
+              <h2 className="text-lg font-semibold text-white">Keyboard Shortcuts</h2>
+            </div>
+          </div>
+          <div className="p-6">
+            <p className="text-sm text-slate-400 mb-6">Standard browser shortcuts are supported for quick navigation.</p>
+            <div className="space-y-3">
+              {shortcuts.map((shortcut) => (
+                <div 
+                  key={shortcut.description} 
+                  className="flex items-center justify-between py-4 px-4 rounded-lg bg-slate-900/50 border border-slate-700/50 hover:border-slate-600/50 transition-colors"
+                >
+                  <span className="text-slate-300 text-sm font-medium">{shortcut.description}</span>
+                  <div className="flex gap-1.5">
+                    {shortcut.keys.map((key) => (
+                      <kbd
+                        key={key}
+                        className="px-3 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono text-slate-200 shadow-md shadow-slate-900/50 min-w-[2.5rem] text-center"
+                      >
+                        {key}
+                      </kbd>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <div className="flex items-start gap-3">
+                <Zap className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-amber-300 text-sm font-medium mb-1">Pro Tip</p>
+                  <p className="text-amber-400/80 text-xs">More keyboard shortcuts will be added in future releases. Stay tuned!</p>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       )}
 
       {/* FAQ */}
       {activeSection === 'faq' && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-white">Frequently Asked Questions</h2>
-          {faqs.map((faq, index) => (
-            <div key={index} className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-              <button
-                onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
-                className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-700/50 transition"
-              >
-                <span className="text-sm font-medium text-white pr-4">{faq.question}</span>
-                {openFAQ === index ? (
-                  <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                )}
-              </button>
-              {openFAQ === index && (
-                <div className="px-4 pb-4 text-sm text-gray-400 leading-relaxed border-t border-gray-700 pt-3">
-                  {faq.answer}
-                </div>
-              )}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-green-500/20 border border-green-500/20">
+              <Search className="w-5 h-5 text-green-400" />
             </div>
-          ))}
+            <h2 className="text-xl font-semibold text-white">Frequently Asked Questions</h2>
+          </div>
+          <div className="space-y-3">
+            {faqs.map((faq, index) => (
+              <div 
+                key={index} 
+                className="rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 overflow-hidden hover:border-slate-600/50 transition-colors"
+              >
+                <button
+                  onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
+                  className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-700/20 transition-colors"
+                >
+                  <span className="text-sm font-medium text-white pr-4">{faq.question}</span>
+                  <div className={`flex-shrink-0 p-1.5 rounded-lg transition-all duration-200 ${openFAQ === index ? 'bg-cyan-500/20 text-cyan-400 rotate-180' : 'text-slate-500'}`}>
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </button>
+                {openFAQ === index && (
+                  <div className="px-5 pb-5 text-sm text-slate-400 leading-relaxed border-t border-slate-700/50 pt-4">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* About */}
       {activeSection === 'about' && (
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-white">About K8s Dashboard</h2>
-          <div className="space-y-4 text-sm text-gray-400">
-            <p>
-              K8s Dashboard is a modern, full-stack Kubernetes monitoring and management application
-              built with React, TypeScript, and FastAPI.
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-900 rounded-lg p-4">
-                <h3 className="text-white font-medium mb-2">Frontend</h3>
-                <ul className="space-y-1">
-                  <li>React 18 + TypeScript</li>
-                  <li>Vite 5 (Build Tool)</li>
-                  <li>TailwindCSS (Styling)</li>
-                  <li>Zustand (State Management)</li>
-                  <li>React Query (Data Fetching)</li>
-                  <li>Recharts (Charts/Graphs)</li>
-                </ul>
+        <div className="space-y-6">
+          <div className="relative overflow-hidden rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 shadow-xl">
+            <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10"></div>
+            <div className="relative p-6 pt-12">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/20">
+                  <Server className="w-5 h-5 text-cyan-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-white">About K8s Dashboard</h2>
               </div>
-              <div className="bg-gray-900 rounded-lg p-4">
-                <h3 className="text-white font-medium mb-2">Backend</h3>
-                <ul className="space-y-1">
-                  <li>Python 3.13 + FastAPI</li>
-                  <li>SQLAlchemy (ORM)</li>
-                  <li>SQLite (Database)</li>
-                  <li>JWT Authentication</li>
-                  <li>Kubernetes Python Client</li>
-                  <li>Pydantic v2 (Validation)</li>
-                </ul>
+              <p className="text-slate-400 leading-relaxed mb-6">
+                K8s Dashboard is a modern, full-stack Kubernetes monitoring and management application
+                built with React, TypeScript, and FastAPI.
+              </p>
+            </div>
+          </div>
+
+          {/* Tech Stack */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative overflow-hidden rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 shadow-xl">
+              <div className="p-5 border-b border-slate-700/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/20">
+                    <Globe className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">Frontend</h3>
+                </div>
+              </div>
+              <div className="p-5">
+                <div className="space-y-2.5">
+                  {[
+                    'React 18 + TypeScript',
+                    'Vite 5 (Build Tool)',
+                    'TailwindCSS (Styling)',
+                    'Zustand (State Management)',
+                    'React Query (Data Fetching)',
+                    'Recharts (Charts/Graphs)',
+                  ].map((tech) => (
+                    <div key={tech} className="flex items-center gap-3 rounded-lg bg-slate-900/50 border border-slate-700/50 px-4 py-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0"></div>
+                      <span className="text-slate-300 text-sm">{tech}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="border-t border-gray-700 pt-4">
-              <p className="text-gray-500">Version 1.0.0 &middot; Developed as academic project</p>
+
+            <div className="relative overflow-hidden rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 shadow-xl">
+              <div className="p-5 border-b border-slate-700/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-500/20 border border-green-500/20">
+                    <Terminal className="w-5 h-5 text-green-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">Backend</h3>
+                </div>
+              </div>
+              <div className="p-5">
+                <div className="space-y-2.5">
+                  {[
+                    'Python 3.13 + FastAPI',
+                    'SQLAlchemy (ORM)',
+                    'SQLite (Database)',
+                    'JWT Authentication',
+                    'Kubernetes Python Client',
+                    'Pydantic v2 (Validation)',
+                  ].map((tech) => (
+                    <div key={tech} className="flex items-center gap-3 rounded-lg bg-slate-900/50 border border-slate-700/50 px-4 py-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0"></div>
+                      <span className="text-slate-300 text-sm">{tech}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Version & Links */}
+          <div className="relative overflow-hidden rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 shadow-xl">
+            <div className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <p className="text-slate-500 text-sm">Version 1.0.0</p>
+                  <p className="text-slate-400 text-sm mt-1">Developed as academic project</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <a href="#" className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900/50 border border-slate-700/50 text-slate-300 hover:text-white hover:border-slate-600/50 transition-colors text-sm">
+                    <Github className="w-4 h-4" />
+                    GitHub
+                    <ExternalLink className="w-3 h-3 text-slate-500" />
+                  </a>
+                  <a href="#" className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900/50 border border-slate-700/50 text-slate-300 hover:text-white hover:border-slate-600/50 transition-colors text-sm">
+                    <Mail className="w-4 h-4" />
+                    Contact
+                    <ExternalLink className="w-3 h-3 text-slate-500" />
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>

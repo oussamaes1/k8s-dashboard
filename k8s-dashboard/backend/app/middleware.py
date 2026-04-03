@@ -109,6 +109,15 @@ def get_user_k8s_service(request: Request, cluster_id: int, user_id: int):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Cluster not found or access denied"
             )
+
+        if not k8s_service.is_connected():
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=(
+                    "Cluster is configured but currently unreachable. "
+                    "Please verify kubeconfig/API server settings and test connection in Cluster Management."
+                ),
+            )
         
         return k8s_service
         

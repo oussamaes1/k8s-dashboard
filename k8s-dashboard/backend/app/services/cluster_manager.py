@@ -252,7 +252,16 @@ class ClusterManager:
         """
         # Check cache first
         if cluster_id in self._cluster_cache:
-            return self._cluster_cache[cluster_id]
+            cached_service = self._cluster_cache[cluster_id]
+            if cached_service.is_connected():
+                return cached_service
+
+            # Avoid permanently serving a stale disconnected client
+            logger.warning(
+                "Cached Kubernetes service for cluster %s is disconnected; recreating client",
+                cluster_id,
+            )
+            del self._cluster_cache[cluster_id]
         
         # Get cluster from database
         cluster = self.get_cluster_by_id(db, cluster_id, user_id)
@@ -263,13 +272,17 @@ class ClusterManager:
         # Create KubernetesService instance
         try:
             k8s_service = self._create_k8s_service_from_cluster(cluster)
-            
-            # Update last connected timestamp
-            cluster.last_connected = datetime.utcnow()
-            db.commit()
-            
-            # Cache the service
-            self._cluster_cache[cluster_id] = k8s_service
+
+            # Persist and cache only healthy connections
+            if k8s_service.is_connected():
+                cluster.last_connected = datetime.utcnow()
+                db.commit()
+                self._cluster_cache[cluster_id] = k8s_service
+            else:
+                logger.warning(
+                    "Cluster %s service initialized but not connected; skipping cache",
+                    cluster_id,
+                )
             
             return k8s_service
             

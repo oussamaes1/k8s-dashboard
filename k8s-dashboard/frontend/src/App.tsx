@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -18,19 +18,57 @@ import Pods from './pages/Pods'
 import Logs from './pages/Logs'
 import Alerts from './pages/Alerts'
 import Metrics from './pages/Metrics'
+import Observability from './pages/Observability'
 import RootCauseAnalysis from './pages/RootCauseAnalysis'
 import Settings from './pages/Settings'
 import Help from './pages/Help'
-import { useAuthStore } from './store'
+import { useAuthStore, useClusterStore } from './store'
 
 function App() {
   const { token, isAuthenticated, isAdmin } = useAuthStore()
+  const { fetchClusters, fetchAvailableNamespaces } = useClusterStore()
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    let mounted = true
+
+    const bootstrap = async () => {
+      if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      }
+
+      if (!isAuthenticated) {
+        if (mounted) setIsInitialized(true)
+        return
+      }
+
+      try {
+        await fetchClusters()
+        await fetchAvailableNamespaces()
+      } catch (error) {
+        console.error('Bootstrap initialization failed:', error)
+      } finally {
+        if (mounted) setIsInitialized(true)
+      }
     }
-  }, [token])
+
+    bootstrap()
+
+    return () => {
+      mounted = false
+    }
+  }, [token, isAuthenticated, fetchClusters, fetchAvailableNamespaces])
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-400 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-300 text-sm">Initializing dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Routes>
@@ -58,6 +96,7 @@ function App() {
         <Route path="/pods" element={<Pods />} />
         <Route path="/logs" element={<Logs />} />
         <Route path="/metrics" element={<Metrics />} />
+        <Route path="/observability" element={<Observability />} />
         <Route path="/root-cause-analysis" element={<RootCauseAnalysis />} />
         <Route path="/alerts" element={isAdmin ? <Alerts /> : <Navigate to="/user-dashboard" replace />} />
         <Route path="/settings" element={<Settings />} />
