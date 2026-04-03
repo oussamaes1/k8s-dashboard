@@ -1,5 +1,0 @@
-NAME                     IMAGE                    COMMAND                  SERVICE    CREATED          STATUS                    PORTS
-k8s-dashboard-backend    k8s-dashboard-backend    "uvicorn app.main:ap…"   backend    52 seconds ago   Up 50 seconds (healthy)   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
-k8s-dashboard-frontend   k8s-dashboard-frontend   "/docker-entrypoint.…"   frontend   51 seconds ago   Up 50 seconds             0.0.0.0:3000->80/tcp, [::]:3000->80/tcp
-{"status":"healthy","kubernetes_connected":true,"anomaly_detector_ready":true}
-200
